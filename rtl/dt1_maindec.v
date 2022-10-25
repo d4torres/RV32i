@@ -1,26 +1,27 @@
 module dt1_maindec(							//This will decode what type of instruction we are using
-	input   [6:0] op,
-	input  [2:0] funct3,
-	output reg	       Branch,
-					   Jump,
-					   ALUBSrc,
-					   RegWrite,
-					   PCTargetALUSrc,
 	`ifdef RISCV-FORMAL
-		output reg 				rvfi_valid,
-		output reg [63 : 0] 	rvfi_order,
-		output reg [4095 : 0] 	rvfi_insn,
+		output reg 				rvfi_valid_id,
+		output reg [63 : 0] 	rvfi_order_id,
+		output reg [31 : 0] 	rvfi_insn_,
 		output reg				rvfi_trap,
 		output reg 				rvfi_halt,
 		output reg				rvfi_intr,
 		output reg [1:0] 		rvfi_mode,
 		output reg [1:0] 		rvfi_ixl,
 	`endif
+	input  wire [6:0]  op,
+	input  wire [2:0]  funct3,
+	output reg	       Branch,
+	output reg         Jump,
+	output reg         ALUBSrc,
+	output reg         RegWrite,
+	output reg         PCTargetALUSrc,
 	output reg [1:0]   ResultSrc,
-					   ALUOp,
-					   ALUASrc,
-					   MemWrite,
-	output reg   [2:0] LoadSizeD,ImmSrc
+	output reg [1:0]   ALUOp,
+	output reg [1:0]   ALUASrc,
+	output reg [1:0]   MemWrite,
+	output reg [2:0]   LoadSizeD,
+	output reg [2:0]   ImmSrc
 	
 );				// Port Declarations
 
@@ -42,9 +43,9 @@ always@(*) begin
 						default:begin
 								`ifdef RISCV-FORMAL
 									rvfi_valid = 1'b0;
-									rvfi_order = 64{{1'bx}};
-									rvfi_insn = 4096{{1'bx}};
-									rvfi_trap = 1'bx;
+									rvfi_order = {64{1'bx}};
+									rvfi_insn = {32{1'bx}};
+									rvfi_trap = 1'b1;
 									rvfi_halt = 1'bx;
 									rvfi_intr = 1'bx;
 									rvfi_mode = 2'bxx;
@@ -63,7 +64,7 @@ always@(*) begin
 									rvfi_valid = 1'b0;
 									rvfi_order = 64{{1'bx}};
 									rvfi_insn = 4096{{1'bx}};
-									rvfi_trap = 1'bx;
+									rvfi_trap = 1'b1;
 									rvfi_halt = 1'bx;
 									rvfi_intr = 1'bx;
 									rvfi_mode = 2'bxx;
@@ -83,7 +84,7 @@ always@(*) begin
 																   rvfi_valid = 1'b0;
 																   rvfi_order = 64{{1'bx}};
 															       rvfi_insn = 4096{{1'bx}};
-																   rvfi_trap = 1'bx;
+																   rvfi_trap = 1'b1;
 																   rvfi_halt = 1'bx;
 																   rvfi_intr = 1'bx;
 																   rvfi_mode = 2'bxx;
@@ -102,7 +103,7 @@ always@(*) begin
 									rvfi_valid = 1'b0;
 									rvfi_order = 64{{1'bx}};
 									rvfi_insn = 4096{{1'bx}};
-									rvfi_trap = 1'bx;
+									rvfi_trap = 1'b1;
 									rvfi_halt = 1'bx;
 									rvfi_intr = 1'bx;
 									rvfi_mode = 2'bxx;

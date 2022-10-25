@@ -1,48 +1,91 @@
 module dt1_ID_stage(
-	input  		clk,rst,
-	//control signals from hazard unit output
-	input  		FlushE,
-	//control signals from Writeback output
-	input  		RegWriteW,
-	//data signals from ifid register output
-	input  [31:0] 	InstrD,PCD,PCPlus4D,
-	//data signals from Writeback output
-	input  [31:0]	ResultW,
-	input  [4:0]   RdW,
-	//ID/IE register outputs
-	
 	`ifdef RISCV-FORMAL
-		output  			rvfi_valid,
-		output [63 : 0] 	rvfi_order,
-		output [4095 : 0] 	rvfi_insn,
-		output  			rvfi_trap,
-		output  			rvfi_halt,
-		output  			rvfi_intr,
-		output [1:0] 		rvfi_mode,
-		output [1:0] 		rvfi_ixl,
+		output reg 			    rvfi_valid_ie,
+		output reg [63 : 0] 	rvfi_order_ie,
+		output reg [31 : 0] 	rvfi_insn_ie,
+		output reg				rvfi_trap_ie,
+		output reg				rvfi_halt_ie,
+		output reg 			    rvfi_intr_ie,
+		output reg [1:0] 		rvfi_mode_ie,
+		output reg [1:0] 		rvfi_ixl_ie,
 	`endif
+	input  wire		    clk,
+	input  wire 		rst,
+	//control signals from hazard unit output
+	input  wire         FlushE,
+	//control signals from Writeback output
+	input  wire		    RegWriteW,
+	//data signals from ifid register output
+	input  wire [31:0] 	InstrD,
+	input  wire [31:0]	PCD,
+	input  wire [31:0]  PCPlus4D
+	//data signals from Writeback output
+	input  wire [31:0]	ResultW,
+	input  wire [4:0]   RdW,
+	//ID/IE register outputs
 	//to Execute stage
-	output  [31:0]	RD1E,RD2E,PCE,ImmExtE,PCPlus4E,
+	output wire [31:0]	RD1E,
+	output wire [31:0]  RD2E,
+	output wire [31:0]  PCE,
+	output wire [31:0]  ImmExtE,
+	output wire [31:0]  PCPlus4E,
 	//to hazard unit
-	output  [4:0] 	Rs1E,Rs2E,RdE,
+	output wire [4:0] 	Rs1E,
+	output wire [4:0]   Rs2E,
+	output wire [4:0]   RdE,
 	//to execute stage control
-	output 	     	RegWriteE,JumpE,BranchE,ALUBSrcE,PCTargetALUSrcE,
-	output  [1:0] 	ResultSrcE,MemWriteE,ALUASrcE,
-	output  [2:0] 	LoadSizeE,
-	output  [3:0] 	ALUControlE
+	output reg     	    RegWriteE,
+	output reg 		    JumpE,
+	output reg 		    BranchE,
+	output reg 		    ALUBSrcE,
+	output reg 		    PCTargetALUSrcE,
+	output reg [1:0] 	ResultSrcE,
+	output reg [1:0]    MemWriteE,
+	output reg [1:0]    ALUASrcE,
+	output reg [2:0] 	LoadSizeE,
+	output reg [3:0] 	ALUControlE
 );
 	
 	//datapath outputs to ID/IE register input
-	wire [31:0]	RD1D,RD2D,ImmExtD;
+	wire [31:0]	RD1D;
+	wire [31:0] RD2D;
+	reg  [31:0] ImmExtD;
 
 	//control unit outputs to ID/IE register input
-	wire	   	RegWriteD,JumpD,BranchD,ALUBSrcD,PCTargetALUSrcD;
-	wire [1:0] ResultSrcD,MemWriteD,ALUASrcD;
-	wire [2:0] LoadSizeD;
-	wire [3:0] ALUControlD;
+	wire	    RegWriteD;
+	wire 	    JumpD;
+	wire        BranchD;
+	wire        ALUBSrcD;
+	wire        PCTargetALUSrcD;
+	wire [1:0]  ResultSrcD;
+	wire [1:0]  MemWriteD;
+	wire [1:0]  ALUASrcD;
+	wire [2:0]  LoadSizeD;
+	wire [3:0]  ALUControlD;
 	//control unit to extend unit
 	wire [2:0] ImmSrcD;
+	
+	`ifdef RISCV-FORMAL
+		wire 			rvfi_valid_id,
+		wire [63 : 0] 	rvfi_order_id,
+		wire [31 : 0] 	rvfi_insn_id,
+		wire			rvfi_trap_id,
+		wire			rvfi_halt_id,
+		wire 			rvfi_intr_id,
+		wire [1:0] 		rvfi_mode_id,
+		wire [1:0] 		rvfi_ixl_id,
+	`endif
 	dt1_control control(
+		`ifdef RISCV-FORMAL
+			.rvfi_valid_id(rvfi_valid_id),
+			.rvfi_order_id(rvfi_order_id),
+			.rvfi_insn_id(rvfi_insn_id),
+			.rvfi_trap_id(rvfi_trap_id),
+			.rvfi_halt_id(rvfi_halt_id),
+			.rvfi_intr_id(rvfi_intr_id),
+			.rvfi_mode_id(rvfi_mode_id),
+			.rvfi_ixl_id(rvfi_ixl_id),
+		`endif
 		 //inputs
 		.op(InstrD[6:0]),
 		.funct3(InstrD[14:12]),
@@ -59,11 +102,6 @@ module dt1_ID_stage(
 		.BranchD(BranchD),
 		.LoadSizeD(LoadSizeD),
 		.PCTargetALUSrcD(PCTargetALUSrcD)
-		.rvfi_valid
-		.rvfi_valid
-		.rvfi_valid
-		.rvfi_valid
-		.rvfi_valid
 	);
 	dt1_regfile regfile1(
 		.clk(clk),
@@ -73,9 +111,11 @@ module dt1_ID_stage(
 		.a2(InstrD[24:20]),
 		.a3(RdW),
 		.wd3(ResultW),
+		//outputs
 		.rd1(RD1D),
 		.rd2(RD2D)
 	);
+	
 	//extend module
 	always@(*) begin
 		case (ImmSrcD)
@@ -88,11 +128,17 @@ module dt1_ID_stage(
 			default:ImmExtD = {32{1'bx}};
 		endcase
 	end
+	
 	//Instruction Decode and Instruction execute register
 	always@(posedge clk) begin
-		if (rst) {RegWriteE, MemWriteE, JumpE, BranchE, ALUASrcE, ALUBSrcE,
-							 ResultSrcE,  ALUControlE, RD1E, RD2E,PCE, ImmExtE, PCPlus4E, RdE, Rs1E, 
-							 Rs2E,LoadSizeE,PCTargetALUSrcE} <= 0;
+		if (rst) begin
+					{RegWriteE, MemWriteE, JumpE, 
+					 BranchE, ALUASrcE, ALUBSrcE,
+				     ResultSrcE,  ALUControlE, 
+					 RD1E, RD2E,PCE, ImmExtE, PCPlus4E, 
+					 RdE, Rs1E, Rs2E,LoadSizeE,PCTargetALUSrcE} <= 0;
+					 
+				 end
 		else if (FlushE) {RegWriteE, MemWriteE, JumpE, BranchE, ALUASrcE, ALUBSrcE,
 							 ResultSrcE,  ALUControlE, RD1E, RD2E,PCE, ImmExtE, PCPlus4E, RdE, Rs1E, 
 							 Rs2E,LoadSizeE,PCTargetALUSrcE} <= 0;
@@ -103,4 +149,5 @@ module dt1_ID_stage(
 																						  PCD, ImmExtD, PCPlus4D, InstrD[11:7], InstrD[19:15], InstrD[24:20],LoadSizeD,PCTargetALUSrcD};
 		
 	end
+	
 endmodule

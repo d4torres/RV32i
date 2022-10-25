@@ -37,7 +37,7 @@ module dt1_top(
 	wire [31:0]ALUResultW, ReadDataW, PCPlus4W;
 
 
-	rv32i_fetch fetchstage(
+	dt1_IF_stage fetchstage(
 		.clk(clk),
 		.rst(rst),
 		.PCSrcE(PCSrcE),
@@ -51,7 +51,7 @@ module dt1_top(
 		.PCD(PCD),
 		.PCPlus4D(PCPlus4D)
 	);
-	rv32i_decode decodestage(
+	dt1_ID_stage decodestage(
 		.clk(clk),
 		.rst(rst),
 		.FlushE(FlushE),
@@ -80,7 +80,7 @@ module dt1_top(
 		.LoadSizeE(LoadSizeE),
 		.ALUControlE(ALUControlE)
 	);
-	rv32i_execute executestage(
+	dt1_IE_stage executestage(
 		.clk(clk),
 		.rst(rst),
 		.RD1E(RD1E),
@@ -113,7 +113,7 @@ module dt1_top(
 		.ALUResultM(ALUResultM),
 		.RdM(RdM)
 	);
-	rv32i_datamemory datamemorystage(
+	dt1_DM_stage datamemorystage(
 		.clk(clk),
 		.rst(rst),
 		.RegWriteM(RegWriteM),
@@ -130,14 +130,14 @@ module dt1_top(
 		.ReadDataW(ReadDataW), 
 		.PCPlus4W(PCPlus4W)
 	);
-	rv32i_writeback writebackstage(
+	dt1_WB_stage writebackstage(
 		.ResultSrcW(ResultSrcW),
 		.ALUResultW(ALUResultW), 
 		.ReadDataW(ReadDataW), 
 		.PCPlus4W(PCPlus4W),
 		.ResultW(ResultW)
 	);
-	hazunit hazardunit(
+	dt1_hazunit hazardunit(
 		.Rs1E(Rs1E), 
 		.Rs2E(Rs2E),
 		.RdM(RdM), 
