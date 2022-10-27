@@ -16,5 +16,5 @@ module dt1_WB_stage(
 	
 );
 	//selects data to write to regfile and to forward to execute stage
-	assign ResultW[1] = ResultSrcW ? PCPlus4W : (ResultW[0] ? ReadDataW : ALUResultW);
+	assign ResultW = ResultSrcW[1] ? PCPlus4W : (ResultSrcW[0] ? ReadDataW : ALUResultW);
 endmodule
